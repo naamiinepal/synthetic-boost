@@ -1,0 +1,86 @@
+[
+    {
+        "model_name": "CLIPSeg",
+        "stage": "camus",
+        "prompt_number": 8,
+        "encoder": "freeze",
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/metrics/camus_metrics/clip_seg/p?/metrics.csv"
+    },
+    {
+        "model_name": "CLIPSeg",
+        "stage": "sdm",
+        "prompt_number": 7,
+        "encoder": "freeze",
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/metrics/sdm_camus_metrics/clip_seg/p?/metrics.csv"
+    },
+    {
+        "model_name": "CLIPSeg",
+        "stage": "pt-ft",
+        "prompt_number": 8,
+        "encoder": "freeze",
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/metrics/pt_on_sdm_camus_ft_on_camus_metrics/clip_seg/p?/metrics.csv"
+    },
+    {
+        "model_name": "CRIS",
+        "stage": "camus",
+        "prompt_number": 8,
+        "encoder": "freeze",
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/metrics/camus_metrics/cris/p?/metrics.csv"
+    },
+    {
+        "model_name": "CRIS",
+        "stage": "sdm",
+        "prompt_number": 7,
+        "encoder": "freeze",
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/metrics/sdm_camus_metrics/cris/p?/metrics.csv"
+    },
+    {
+        "model_name": "CRIS",
+        "stage": "pt-ft",
+        "prompt_number": 8,
+        "encoder": "freeze",
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/metrics/pt_on_sdm_camus_ft_on_camus_metrics/cris/p?/metrics.csv"
+    },
+    {
+        "model_name": "CLIPSeg",
+        "stage": "camus",
+        "prompt_number": 8,
+        "encoder": "unfreeze",
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/camus_metrics_reduce_lr/clip_seg_bs_128/p?/metrics.csv"
+    },
+    {
+        "model_name": "CLIPSeg",
+        "stage": "sdm",
+        "prompt_number": 7,
+        "encoder": "unfreeze",
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/sdm_camus_metrics_reduce_lr/clip_seg_bs_128/p?/metrics.csv"
+    },
+    {
+        "model_name": "CRIS",
+        "stage": "camus",
+        "prompt_number": 8,
+        "encoder": "unfreeze",
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/camus_metrics_reduce_lr/cris/p?/metrics.csv"
+    },
+    {
+        "model_name": "CRIS",
+        "stage": "sdm",
+        "prompt_number": 7,
+        "encoder": "unfreeze",
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/sdm_camus_metrics_reduce_lr/cris/p?/metrics.csv"
+    },
+    {
+        "model_name": "CRIS",
+        "stage": "pt-ft",
+        "prompt_number": 8,
+        "encoder": "unfreeze",
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/pt_on_sdm_camus_ft_on_camus_metrics_reduce_lr/cris/p?/metrics.csv"
+    },
+    {
+        "model_name": "CLIPSeg",
+        "stage": "pt-ft",
+        "prompt_number": 8,
+        "encoder": "unfreeze",
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/pt_on_sdm_camus_ft_on_camus_metrics_reduce_lr/clip_seg_bs_128/p?/metrics.csv"
+    }
+]

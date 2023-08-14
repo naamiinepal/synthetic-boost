@@ -1,0 +1,38 @@
+[
+    {
+        "model_name": "CLIPSeg",
+        "stage": "camus",
+        "prompt_number": 8,
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/camus_metrics_reduce_lr/clip_seg_bs_128/p?/metrics.csv"
+    },
+    {
+        "model_name": "CLIPSeg",
+        "stage": "sdm",
+        "prompt_number": 7,
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/sdm_camus_metrics_reduce_lr/clip_seg_bs_128/p?/metrics.csv"
+    },
+    {
+        "model_name": "CLIPSeg",
+        "stage": "pt-ft",
+        "prompt_number": 8,
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/pt_on_sdm_camus_ft_on_camus_metrics_reduce_lr/clip_seg_bs_128/p?/metrics.csv"
+    },
+    {
+        "model_name": "CRIS",
+        "stage": "camus",
+        "prompt_number": 8,
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/camus_metrics_reduce_lr/cris/p?/metrics.csv"
+    },
+    {
+        "model_name": "CRIS",
+        "stage": "sdm",
+        "prompt_number": 7,
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/sdm_camus_metrics_reduce_lr/cris/p?/metrics.csv"
+    },
+    {
+        "model_name": "CRIS",
+        "stage": "pt-ft",
+        "prompt_number": 8,
+        "csv_glob": "/mnt/Enterprise/rabin/VL-Seg/pt_on_sdm_camus_ft_on_camus_metrics_reduce_lr/cris/p?/metrics.csv"
+    }
+]
