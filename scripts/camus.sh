@@ -9,11 +9,15 @@ train_models=("clip_seg" "cris")
 dataset="camus"
 prompts=("p0" "p1" "p2" "p3" "p4" "p5" "p6" "p7")
 
-
-# Overwrites of vars
-## Pretrained on p6 but fine-tuned on p7
-batch_size=32
 for model in ${train_models[@]}; do
+    if [[ $train_models == "clip_seg" ]] then;
+        batch_size=128
+        lr=0.002
+    else
+        batch_size=32
+        lr=0.00002
+    fi
+
     for prompt in ${prompts[@]}; do
         
         python src/train.py \
@@ -22,7 +26,8 @@ for model in ${train_models[@]}; do
             datamodule=img_txt_mask_${dataset}.yaml \
             prompt_type=${prompt} \
             datamodule.batch_size=${batch_size} \
-            logger.wandb.name=${model}_${prompt} \
+            model.optimizer.lr=${lr} \
+            logger.wandb.name=${model}_${dataset}_${prompt} \
             tags="[${model}, ${dataset}, ${prompt}]" \
             output_masks_dir=output_masks/${model}/${dataset}/${prompt} \
             trainer.accelerator=gpu \

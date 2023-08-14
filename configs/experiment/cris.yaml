@@ -34,7 +34,7 @@ trainer:
 
 logger:
   wandb:
-    project: BiomedCLIPSeg
+    project: SyntheticBoost
     tags: ${tags}
 
 

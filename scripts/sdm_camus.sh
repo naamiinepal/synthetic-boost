@@ -10,10 +10,14 @@ dataset="sdm_camus"
 prompts=("p0" "p1" "p2" "p3" "p4" "p5" "p6")
 
 
-# Overwrites of vars
-## Pretrained on p6 but fine-tuned on p7
-batch_size=32
 for model in ${train_models[@]}; do
+    if [[ $train_models == "clip_seg" ]] then;
+        batch_size=128
+        lr=0.002
+    else
+        batch_size=32
+        lr=0.00002
+    fi
     for prompt in ${prompts[@]}; do
         experiment_name=${model}_${dataset}_${prompt}
         
@@ -23,6 +27,7 @@ for model in ${train_models[@]}; do
             datamodule=img_txt_mask_${dataset}.yaml \
             prompt_type=${prompt} \
             datamodule.batch_size=${batch_size} \
+            model.optimizer.lr=${lr} \
             logger.wandb.name=${model}_${prompt} \
             tags="[${model}, ${dataset}, ${prompt}]" \
             output_masks_dir=output_masks/${model}/${dataset}/${prompt} \
