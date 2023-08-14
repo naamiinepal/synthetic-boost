@@ -11,7 +11,8 @@ prompts=("p0" "p1" "p2" "p3" "p4" "p5" "p6")
 
 
 for model in ${train_models[@]}; do
-    if [[ $train_models == "clip_seg" ]] then;
+    if [ $train_models == "clip_seg" ]
+    then
         batch_size=128
         lr=0.002
     else
@@ -28,7 +29,6 @@ for model in ${train_models[@]}; do
             prompt_type=${prompt} \
             datamodule.batch_size=${batch_size} \
             model.optimizer.lr=${lr} \
-            logger.wandb.name=${model}_${prompt} \
             tags="[${model}, ${dataset}, ${prompt}]" \
             output_masks_dir=output_masks/${model}/${dataset}/${prompt} \
             trainer.accelerator=gpu \

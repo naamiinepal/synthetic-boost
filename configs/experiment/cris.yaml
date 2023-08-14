@@ -35,6 +35,7 @@ trainer:
 logger:
   wandb:
     project: SyntheticBoost
+    name: ${experiment_name}
     tags: ${tags}
 
 

@@ -8,7 +8,7 @@ defaults:
 
 model_checkpoint:
   dirpath: ${paths.output_dir}/checkpoints
-  filename: "epoch_{epoch:03d}"
+  filename: "best"
   monitor: "val_dice_epoch"
   mode: "max"
   save_last: false

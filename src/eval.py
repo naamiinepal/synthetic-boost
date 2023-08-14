@@ -133,13 +133,15 @@ def evaluate(cfg: DictConfig) -> Tuple[dict, dict]:
                 pass
 
             for pred, mask_name, h, w in zip(preds, mask_names, heights, widths):
+                file_path = f"{output_masks_dir}/{mask_name}"
+                os.makedirs(os.path.dirname(file_path), exist_ok=True)
                 torchvision.utils.save_image(
                     TF.resize(
                         pred.double(),
                         size=[h, w],
                         interpolation=TF.InterpolationMode.NEAREST_EXACT,
                     ),
-                    f"{output_masks_dir}/{mask_name}",
+                    file_path,
                 )
 
     # Predict the output masks and save in a directory
@@ -173,13 +175,15 @@ def evaluate(cfg: DictConfig) -> Tuple[dict, dict]:
                     os.remove(os.path.join(output_masks_dir, f))
 
             for pred, mask_name, h, w in zip(preds, mask_names, heights, widths):
+                file_path = f"{output_masks_dir}/{mask_name}"
+                os.makedirs(os.path.dirname(file_path), exist_ok=True)
                 torchvision.utils.save_image(
                     TF.resize(
                         pred.double(),
                         size=[h, w],
                         interpolation=TF.InterpolationMode.NEAREST_EXACT,
                     ),
-                    f"{output_masks_dir}/{mask_name}",
+                    file_path,
                 )
         else:
             raise ValueError(
