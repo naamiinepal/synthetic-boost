@@ -32,7 +32,6 @@ for model in ${train_models[@]}; do
             output_masks_dir=output_masks/${model}/${dataset}/${prompt} \
             trainer.accelerator=gpu \
             trainer.devices=[0] \
-            trainer.precision=16-mixed\
-            trainer.max_epochs=2
+            trainer.precision=16-mixed
     done
 done

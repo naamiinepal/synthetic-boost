@@ -41,7 +41,6 @@ for model in ${train_models[@]}; do
             ckpt_path=${sdm_ckpt} \
             trainer.accelerator=gpu \
             trainer.devices=[0] \
-            trainer.precision=16-mixed \
-            trainer.max_epochs=4
+            trainer.precision=16-mixed
     done
 done
