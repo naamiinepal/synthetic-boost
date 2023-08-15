@@ -1,0 +1,82 @@
+% \usepackage[
+%     paperwidth=6.1in,
+%     paperheight=9.25in,
+%     left=0.75in,
+%     right=0.75in,
+%     top=0.75in,
+%     bottom=1.125in
+% ]{geometry}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+
+\usepackage{hyperref}       % hyperlinks
+% \usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+% % \usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+
+\usepackage{soul} % underlining, hightlighting striking out
+
+\usepackage{graphicx}
+\graphicspath{{./images}}
+
+% If you use the hyperref package, please uncomment the following line
+% to display URLs in blue Roman font according to Springer's eBook style:
+\renewcommand\UrlFont{\color{blue}\rmfamily}
+
+\usepackage[capitalize]{cleveref}
+
+% \usepackage{diagbox}
+
+\usepackage{multirow}
+
+% \usepackage{soul}
+
+\newcommand{\smallStd}[1]{\ensuremath{\scriptscriptstyle \pm #1}}
+
+\newcommand{\changed}[1]{\textcolor{blue}{#1}}
+\newcommand{\todo}[1]{\textcolor{red}{#1}}
+
+\newcommand*\samethanks[1][\value{footnote}]{\footnotemark[#1]}
+
+\newcommand{\specialcell}[2][c]{\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+\title{Synthetic Boost: Leveraging Synthetic Data for Enhanced Vision-Language Segmentation in Echocardiography}
+%
+\titlerunning{Synthetic Boost}
+
+
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\author{Rabin Adhikari\thanks{Equal Contribution}\orcidID{0000-0001-5019-2205} \and 
+Manish Dhakal\samethanks\orcidID{0000-0002-0101-5592} \and
+Safal Thapaliya\samethanks\orcidID{0000-0002-4463-6700} \and 
+Kanchan Poudel\orcidID{0009-0007-7249-5494} \and 
+Prasiddha Bhandari\orcidID{0009-0004-0836-8253} \and 
+Bishesh Khanal\orcidID{0000-0002-2775-4748}}
+
+% index{Rabin, Adhikari}
+% index{Manish, Dhakal}
+% index{Safal, Thapaliya}
+% index{Kanchan, Poudel}
+% index{Prasiddha, Bhandari}
+% index{Bishesh, Khanal}
+
+\authorrunning{R. Adhikari et al.}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+% \institute{Princeton University, Princeton NJ 08544, USA \and
+% Springer Heidelberg, Tiergarten. 17, 69121 Heidelberg, Germany
+% \email{lncs@springer.com}\\
+% \url{http://www.springer.com/gp/computer-science/lncs} \and
+% ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
+% \email{\{abc,lncs\}@uni-heidelberg.de}}
+
+\institute{NepAl Applied Mathematics and Informatics Institute for research (NAAMII)\\
+\email{\{rabin.adhikari,bishesh.khanal\}@naamii.org.np}
+}

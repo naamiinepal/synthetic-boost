@@ -1,9 +1,11 @@
+import os
 from typing import Any, Dict, Optional
+
 import albumentations as A
 import cv2
 from albumentations.pytorch import ToTensorV2
 from torch.utils.data import Dataset
-import os
+
 
 class ImageMaskDataset(Dataset):
     r"""
@@ -56,9 +58,8 @@ class ImageMaskDataset(Dataset):
         return len(self.images)
 
     def __getitem__(self, index) -> Dict[str, Any]:
-        
         file_name = self.images[index]
-        
+
         image = cv2.imread(f"{self.images_dir}/{file_name}", cv2.IMREAD_COLOR)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -79,7 +80,7 @@ class ImageMaskDataset(Dataset):
             transformed = self.default_transforms(image=image, mask=mask)
             image = transformed["image"]
             mask = transformed["mask"]
-        
+
         return dict(
             pixel_values=image,
             mask=mask,
@@ -93,6 +94,6 @@ class ImageMaskDataset(Dataset):
 if __name__ == "__main__":
     ds = ImageMaskDataset(
         images_dir="/mnt/Enterprise/PUBLIC_DATASETS/SDM_generated_data/2_chamber_end_diastole/images/training/",
-        masks_dir="/mnt/Enterprise/PUBLIC_DATASETS/SDM_generated_data/2_chamber_end_diastole/annotations/training/"
+        masks_dir="/mnt/Enterprise/PUBLIC_DATASETS/SDM_generated_data/2_chamber_end_diastole/annotations/training/",
     )
     ds[0]
