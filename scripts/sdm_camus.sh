@@ -11,7 +11,7 @@ prompts=("p0" "p1" "p2" "p3" "p4" "p5" "p6")
 
 
 for model in ${train_models[@]}; do
-    if [ $train_models == "clip_seg" ]
+    if [ $model == "clip_seg" ]
     then
         batch_size=128
         lr=0.002

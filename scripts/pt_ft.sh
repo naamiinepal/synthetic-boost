@@ -12,9 +12,8 @@ dataset="camus"
 prompts=("p0" "p1" "p2" "p3" "p4" "p5" "p6" "p7" )
 
 
-batch_size=32
 for model in ${train_models[@]}; do
-    if [ $train_models == "clip_seg" ]
+    if [ $model == "clip_seg" ]
     then
         batch_size=128
         lr=0.002
@@ -43,6 +42,6 @@ for model in ${train_models[@]}; do
             trainer.accelerator=gpu \
             trainer.devices=[0] \
             trainer.precision=16-mixed \
-            trainer.max_epochs=2
+            trainer.max_epochs=4
     done
 done
