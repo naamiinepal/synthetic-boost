@@ -1,4 +1,11 @@
+
 # Reproducing the results
+
+## Prerequisites
+- Python version 3.10 (preferable).
+- Download datasets as instructed below.
+- Download pretrained checkpoints as instructed below.
+
 
 You can download a copy of all the files in this repository by cloning the
 [git](https://git-scm.com/) repository:
@@ -83,4 +90,24 @@ To convert the model, run the following command after saving the downloaded mode
 
 ```sh
     python scripts/convert_cris_model.py
+```
+
+## Training VLSMs
+
+### CAMUS
+Finetune the VLSMs with CAMUS dataset:
+```sh
+    bash scripts/camus.sh
+```
+
+### SDM CAMUS
+Finetune the VLSMs with SDM CAMUS dataset:
+```sh
+    bash scripts/sdm_camus.sh
+```
+
+### PT-FT Strategy
+Finetune the VLSMs with CAMUS dataset, already finetuned on SDM CAMUS dataset:
+```sh
+    bash scripts/pt_ft.sh
 ```
