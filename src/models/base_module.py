@@ -2,9 +2,9 @@ import re
 from typing import Any, Callable, Mapping, Optional
 
 import torch
-from monai.networks import one_hot
 from monai.metrics.meandice import compute_dice
 from monai.metrics.meaniou import compute_iou
+from monai.networks import one_hot
 from pytorch_lightning import LightningModule
 from pytorch_lightning.loggers.wandb import WandbLogger
 from torch import nn

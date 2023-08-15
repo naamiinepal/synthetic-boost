@@ -1,15 +1,12 @@
+import json
+from glob import glob
 from pathlib import Path
+from typing import List, Tuple, Union
 
+import matplotlib.pylab as plt
 import pandas as pd
-
 import seaborn as sns
 from matplotlib.figure import Figure
-import matplotlib.pylab as plt
-
-from typing import List, Tuple, Union
-from glob import glob
-
-import json
 
 
 def get_metrics(

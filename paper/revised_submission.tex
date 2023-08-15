@@ -1,0 +1,311 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.20 of 2017/10/04
+%
+\documentclass[runningheads]{llncs}
+
+\usepackage{custom}
+
+
+\begin{document}
+%
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+Accurate segmentation is essential for echocardiography-based assessment of cardiovascular diseases.
+However, the variability among sonographers and the inherent challenges of ultrasound images hinder precise segmentation. 
+By leveraging the joint representation of image and text modalities, Vision-Language Segmentation Models (VLSMs) can incorporate rich contextual information, potentially aiding in accurate and explainable segmentation.
+However, the lack of readily available data in echocardiography \changed{impedes} the training of VLSMs.
+In this study, we explore using synthetic datasets from Semantic Diffusion Models (SDMs) to enhance VLSMs for echocardiography segmentation.
+We evaluate results for two popular VLSMs (CLIPSeg and CRIS) using seven different kinds of language prompts derived from several attributes, automatically extracted from echocardiography \changed{images, segmentation masks, and their metadata.}
+Our results show improved metrics and faster convergence when pretraining VLSMs \changed{on} SDM-generated synthetic images before finetuning \changed{on} real images.
+The code, configs, and prompts are available at \url{https://github.com/naamiinepal/synthetic-boost}.
+
+\keywords{Vision-Language Segmentation Models \and Echocardiography \and Synthetic Data}
+\end{abstract}
+
+\section{Introduction}
+\label{sec:introduction}
+
+Echocardiography (heart ultrasound) is an \changed{integral} diagnostic tool for several cardiovascular diseases (CVDs).
+It is widely used because it is cheap, portable, has no harmful radiation, and has a high temporal resolution (the ability to see \changed{high-definition} images in real-time).
+Accurate estimation of clinically relevant quantitative measures, such as volumes of various cardiac structures and Ejection Fraction (EF) in echocardiography images, require reliable segmentation algorithms.
+However, segmenting \changed{diverse} parts of the heart is challenging due to the variability among the echocardiographers for the same \changed{\st{standard plane} image}, the presence of shadows, speckles, strong attenuation, and low contrast difference among areas of interest in ultrasound images \cite{avola2021ultrasound}.
+Different CNN- and ViT-based \cite{dosovitskiy2020image} U-Net-like models \cite{deng2021transbridge,hatamizadeh2022unetr,isensee2021nnu,ronneberger2015u} are the state-of-the-art segmentation models that rely on supervised training with a relatively large set of annotated echocardiography images.
+\changed{These segmentation models, however, must be trained on predefined classes that necessitate retraining or architecture changes (in the final layer) when new classes are required.
+It is also challenging to manually intervene in or inject specific conditioning, \st{such as image quality,} and make them explicitly benefit from the spatiotemporal relationships of different foreground structures.
+Besides, they lack explainability and are not resilient to distribution shifts.}
+
+Recently, Vision-Language Models (VLMs) \cite{furst2022cloob,huang2020pixel,jia2021scaling,li2021supervision,radford2021learning,singh2022flava,zou2023generalized} have been proposed that learn a joint representation of image and language \cite{lin2014microsoft,plummer2015flickr30k,schuhmann2022laion,sharma2018conceptual}.
+\changed{VLMs extract affluent supplementary information via pairs of language prompts and images, potentially aiding deep learning models to take its explicit benefit.}
+VLMs have one encoder each for image and language inputs, and the encoders are trained \changed{together} to optimize a joint representation using losses such as contrastive loss. 
+Vision-Language Segmentation Models (VLSMs) are adapted from VLMs where a decoder is added and trained on top of pretrained VLMs to segment \changed{the} input image while leveraging information provided by language prompts \cite{luddecke2022image,rao2022denseclip,wang2022cris}.
+However, almost all VLMs are trained using a large set of natural images, and \changed{no VLSMs are trained on an extensive collection} of ultrasound datasets.
+Although some recent methods show that VLMs and VLSMs could be finetuned on limited medical data \cite{qin2022medical}, the performance of these VLSMs is still below the supervised segmentation networks trained and optimized for specific datasets and foreground masks.
+
+One major challenge to improving VLSMs for ultrasound images is the lack of large language-image paired datasets.
+To address the limited data problem, generative models like GANs \cite{goodfellow2014generative} and diffusion models \cite{ho2020denoising} could generate images with a distribution closer to the real-world samples.
+Stojanovski et al. \cite{stojanovski2023echo} trained Semantic Diffusion Models (SDMs) \cite{wang2022semantic} on the CAMUS dataset \cite{leclerc2019deep} to generate synthetic cardiac ultrasound images and showed that \changed{the} segmentation model trained exclusively on a \changed{generated} dataset results in \changed{a test dice score of $89 \pm 2.5$ in the CAMUS dataset}.
+\changed{The use of synthetic images has not been explored for VLSMs.}
+In this work, we explore whether the synthetic images from SDMs can improve the performance of VLSMs in echocardiography images.
+
+Our primary contributions are \changed{as follows.}
+
+\begin{enumerate}
+    \item We show that the VLSMs, pretrained on natural images, generalize to the real dataset (CAMUS) when finetuned on SDM-generated echocardiography images.
+    \item We show that although \changed{numerous} synthetic samples alone are not as good as a small number of real annotated data, the synthetic data finetuned model checkpoint is a good starting point for VLSMs to finetune on the real datasets.
+\end{enumerate}
+
+\section{Methodology}
+\label{sec:methodology}
+
+\subsection{Vision-Language Segmentation Models (VLSMs)}
+\label{sec:vlsm}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{architecture}
+    \caption{
+        \textbf{The basic architecture of CRIS and CLIPSeg VLSMs}\cite{anon2023sup}.
+        The key components in the architecture are a \textit{Text Encoder}, an \textit{Image Encoder}, a \textit{Vision-Language Decoder} (VLD), and an \textit{Aggregator}.
+        The images and the corresponding prompts are passed to the CLIP image and \changed{text} encoders, respectively. 
+        The Aggregator generates intermediate representations utilizing image-level, sentence-level, or word-level representations to feed to the VLD.
+        The VLD outputs a binary mask for an image-text pair. \todo{Highlight the differences between the CLIPSeg and CRIS?}
+    }
+    \label{fig: architecture}
+\end{figure}
+
+CLIP \cite{radford2021learning} is a widely used VLM that jointly trains an image encoder and a text encoder to project semantically similar image-text pairs closer together and semantically disjoint image-text pairs farther apart.
+As shown in \cref{fig: architecture}, we use the contrastive features representations obtained from both the encoders of CLIP and pass them to a vision-language decoder to generate the binary segmentation mask for the image-mask pair.
+Since CLIPSeg \cite{luddecke2022image} and CRIS \cite{wang2022cris} are shown to give state-of-the-art results in different vision-language segmentation tasks of natural images, we have investigated their various combinations with language prompts to implement the VLSMs.
+
+We use the publicly accessible CLIPSeg and CRIS weights pretrained on the natural image-text pairings.
+\changed{In this work, these models are finetuned using two echocardiography datasets: (\textbf{i}) CAMUS \cite{leclerc2019deep}, and (\textbf{ii}) SDM CAMUS \cite{stojanovski2023echo}.}
+We also take the checkpoints of the models trained with the more extensive synthetic data and finetune them with the smaller CAMUS dataset to test if pretraining with synthetic data boosts the segmentation performance on the real data.
+
+\subsection{Datasets}
+\label{sec:datasets}
+
+\subsubsection{CAMUS}
+
+CAMUS \cite{leclerc2019deep} is a cardiac segmentation dataset containing 2D apical four-chamber and two-chamber views from $500$ patients at both end-diastole (ED) and end-systole (ES) cycles.
+The dataset contains the semantic segmentation of the left ventricular cavity, the myocardium, and the left atrial cavity.
+The authors randomly sampled data from $50$ patients as the official test split and the remaining $450$ for the train split.
+Like Stojanovski et al. \cite{stojanovski2023echo}, we selected the data from the first $50$ patients for validation and the remaining $400$ for the training.
+There are $1,600$ images in the training set, $400$ in the validation set, and $200$ in the test set.
+
+\subsubsection{Synthetic Echocardiography}
+
+We use the synthetic echocardiography images proposed by Stojanovski et al. \cite{stojanovski2023echo}, generated using SDMs \cite{wang2022semantic}.
+This model takes perturbed anatomical masks as conditioning information to denoise the noisy images and generates echocardiographic images.
+We use $9,000$ synthetic images ($8,000$ for training and $1,000$ for validation) provided by the authors, the same splits they used to train and validate a vanilla U-Net \cite{ronneberger2015u} model.
+
+\subsection{\changed{Prompt Engineering}}
+\label{sec:prompt_eng}
+
+\subsubsection{Prompts for CAMUS}
+\label{sec:prompt_eng_camus}
+
+\changed{Text prompts have the potential to insinuate valuable context or information explicitly \cite{patashnik2021styleclip}, especially as regularizers, to enforce the models to make them robust and generalizable, and provide constraints on spatial relationships, shape information, cardiac phase information, etc.}
+For our experiments, prompts, images, and masks are needed as triplets but are unavailable in the CAMUS dataset.
+Finding the best prompt for the task is challenging, and creating the prompts manually for each image and mask pair is tedious and not scalable when the dataset size increases.
+Also, the choice of prompts seemed to have significantly affected the performance of the VLMs in the medical domain \cite{qin2022medical}.
+
+\begin{table}[h]
+    \setlength{\tabcolsep}{5pt}
+    \centering
+    \caption{\textbf{The description of the attribute and its possible values.}
+    The prompt number aside shows the prompt in which the attribute is introduced.}
+    \label{tab:prompt_attributes}
+    \begin{tabular}{l|ll}
+         & \textbf{Description} & \textbf{Possible Values} \\
+         \hline
+         \textbf{P0} & Empty String \\
+         \textbf{P1} & Target Structure & left ventricular cavity, myocardium, or left atrium cavity \\
+         \textbf{P2} & Apical View & two-chamber view or four-chamber view \\
+         \textbf{P3} & Cardiac Cycle & end of systole or diastole cycle \\
+         \textbf{P4} & Patient's Sex & male or female \\
+         \textbf{P5} & Patient's Age & \changed{all ages} \\
+         \textbf{P6} & Image Quality & good, medium, or poor \\
+         \textbf{P7} & Structure's Shape & circle, triangle, oval, square, or rectangle \\
+    \end{tabular}
+\end{table}
+
+We follow Anonymous et al. \cite{anon2023sup} to generate automatic prompts adapted for the CAMUS dataset to explore if specific image features could be aligned to language prompts explaining those features.
+The foreground cardiac structure's size and shape depend on the subjects' age, sex, and cardiac cycle phase.
+Similarly, image quality information may help models adapt accordingly. 
+As shown in \cref{tab:prompt_attributes}, various language prompts are designed by including words corresponding to the target structure name, its shape, the information about apical views, cardiac cycle phase, the subject's sex, the subject's age, and image quality \changed{(labeled by an expert within the CAMUS dataset)}.
+We have generated $7$ attributes for the CAMUS dataset and $7$ prompts (\textbf{P1 - P7}) from the attributes, each added incrementally.
+\textbf{P0} is an empty string.
+The attributes in \textbf{P1 - P7} are ordered in descending order of the attribute's perceived importance (\textbf{P1} being the most important).
+
+The sources of the attributes are listed below.
+
+\begin{enumerate}
+    \item \textbf{Image Filename}: We \changed{parse} the images' filenames and masks to get the anatomical structure to segment, apical view, and cardiac cycle.
+    \item \textbf{Image Metadata}: We \changed{parse} the official metadata provided with the images and masks to get patients' sex, age, and image quality.
+    \item \textbf{VQA Model}: We use OFA (One For All) VQA \cite{wang2022ofa} to get target structures' shapes.
+    \changed{The question we asked to the VQA model is ``What is the shape of the \texttt{<structure>} in the green box?''.
+    Here the green box is the boundary of the target structure extracted from its mask.}
+\end{enumerate}
+
+One example prompt \textbf{P7} with seven attributes: \textit{\textbf{Left ventricular cavity} of \textbf{oval shape} in \textbf{two-chamber view} in the cardiac ultrasound at the end of the \textbf{diastole cycle} of a \textbf{40-year-old female} with \textbf{poor image quality}.}
+
+\subsubsection{Prompts for SDM CAMUS}
+\label{sec:prompt_eng_sdm}
+
+We did not use the image quality attribute in SDM CAMUS dataset as the synthetic images' quality is not annotated.
+When synthesizing the prompts, we used the SDM CAMUS dataset's values derived from the original dataset for all other attributes: patient id, view information, and cardiac cycle.
+One example prompt \textbf{P6} for the SDM CAMUS dataset: \textit{\textbf{Left ventricular cavity} of \textbf{oval shape} in \textbf{two-chamber view} in the cardiac ultrasound at the end of the \textbf{diastole cycle} of a \textbf{40-year-old female}.}
+
+\section{Experimental Settings}
+\label{sec:experimental_settings}
+
+Unless specified, we use the default set of parameters mentioned in the original implementation by the respective authors for all experiments.
+The models are finetuned and inferred in NVIDIA GeForce RTX 3090, Titan Xp, and V100 GPUs.
+\changed{We use float-16 mixed-precision training for models with different batch sizes of $32$ and $128$ for CRIS and CLIPSeg, respectively.
+The batch sizes were chosen to utilize the full memory of the GPUs (maximum 24GB); since CRIS has a greater memory footprint than CLIPSeg, we reduced the former's batch size.}
+
+\changed{We use AdamW \cite{loshchilov2017decoupled} optimizer with the weight decay of $10^{-3}$ and an initial learning rate of $2 \times 10^{-3}$ and $2 \times 10^{-5}$ for CLIPSeg and CRIS, respectively.
+The learning rate is reduced by a factor of $10$ if validation loss doesn't decrease for $5$ consecutive epochs\footnote{\url{https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ReduceLROnPlateau.html}}.}
+
+\changed{Three different strategies are employed} to train the models: (\textbf{i}) training only on real data from the CAMUS dataset (\textit{real}), (\textbf{ii}) training only on synthetic data generated from the SDM model (\textit{synthetic}), and (\textbf{iii}) first training the model on the synthetic data, then finetuning on the real data (\textit{synth-PT:real-FT}).
+
+Although CLIPSeg and CRIS resize images to \changed{$416 \times 416$} and $352 \times 352$, respectively, we report the dice score at $512 \times 512$ (nearly the median width of the dataset) by resizing the model's output as required.
+\changed{The preprocessing technique used for the images is to resize the images to the resolution required by the respective models and normalization with means and standard deviation provided by the respective models. Also, we didn't use any augmentations and post-processing to access the raw performance.}
+
+\changed{We used the weighted sum of Dice loss and Cross Entropy loss with weights $1$ and $0.25$, respectively.
+For each experiment, the metrics reported are for the model with the best Dice score on the test set, across the epochs, with an output threshold of $0.5$ on the predicted binary map.}
+
+\changed{For all the experiments, if not explicitly stated, we trained all the parameters for the model pipeline.
+We also performed an ablation study to compare the performance when the encoders are frozen and only the aggregator and decoder are trained.}
+
+\section{Results}
+\label{sec: results}
+
+\subsection{\changed{Synthetic data is better than no data}}
+
+\cref{tab:combined_dice} shows that while the VLSMs pretrained on natural images perform very poorly on ultrasound images in zero-shot segmentation, models trained on synthetic data provide much better results in real ultrasound images.
+
+\begin{table}[h]
+    \centering
+    \caption{\textbf{The dice score (mean $\pm$ std) of models trained and validated on various datasets evaluated on the CAMUS's official test split \changed{when the encoders of the VLMs are unfrozen.}} \changed{The zero-shot performance of the models are extracted from Anonymous et al. \cite{anon2023sup} for comparison.}}
+    \label{tab:combined_dice}
+    \resizebox{\linewidth}{!}{%
+        \begin{tabular}{l|l|cccccccc}
+            \multirow{2}{*}{\textbf{\changed{Strategy}}} & \textbf{Prompt $\rightarrow$} & \multirow{2}{*}{\textbf{P0}} & \multirow{2}{*}{\textbf{P1}} & \multirow{2}{*}{\textbf{P2}} & \multirow{2}{*}{\textbf{P3}} & \multirow{2}{*}{\textbf{P4}} & \multirow{2}{*}{\textbf{P5}} & \multirow{2}{*}{\textbf{P6}} & \multirow{2}{*}{\textbf{P7}} \\
+            \cline{2-2}
+            & \textbf{Model $\downarrow$} \\
+            \hline
+            \multirow{2}{*}{\em \changed{zeroshot}} & \textbf{CLIPSeg} & $0.00 \smallStd{0.00}$ & $0.00 \smallStd{0.00}$ & $0.21 \smallStd{1.79}$ & $0.16 \smallStd{1.85}$ & $0.19 \smallStd{2.11}$ & $\textbf{0.51} \smallStd{3.67}$ & $0.46 \smallStd{3.13}$ & $1.81 \smallStd{6.58}$ \\
+            & \textbf{CRIS} & $23.53  \smallStd{11.99}$ & $9.04  \smallStd{13.87}$ & $8.36  \smallStd{13.2}$ & $8.24  \smallStd{13.2}$ & $8.24  \smallStd{13.2}$ & $8.24  \smallStd{13.2}$ & $8.24  \smallStd{13.2}$ & $5.45 \smallStd{10.41}$ \\
+            \hline
+            \multirow{2}{*}{\em \changed{synthetic}} & \textbf{CLIPSeg} & $45.69 \smallStd{13.18}$ & $84.24 \smallStd{11.95}$ & $84.87 \smallStd{10.85}$ & $85.27 \smallStd{9.66}$ & $84.38 \smallStd{11.0}$ & $83.18 \smallStd{12.79}$ & $83.32 \smallStd{12.51}$ & N/A\\
+            & \textbf{CRIS} & $42.29 \smallStd{17.54}$ & $84.72 \smallStd{11.85}$ & $84.72 \smallStd{10.53}$ & $85.48 \smallStd{10.19}$ & $85.12 \smallStd{11.15}$ & $85.84 \smallStd{10.01}$ & $84.35 \smallStd{13.28}$ & N/A\\
+            \hline
+            \multirow{2}{*}{\em \changed{real}} & \textbf{CLIPSeg} & $\mathbf{46.52 \smallStd{13.3}}$ & $88.53 \smallStd{7.24}$ & $88.81 \smallStd{7.16}$ & $88.77 \smallStd{7.2}$ & $88.58 \smallStd{7.67}$ & $88.27 \smallStd{7.39}$ & $88.45 \smallStd{7.49}$ & $88.16 \smallStd{7.95}$ \\
+            & \textbf{CRIS} & $46.46 \smallStd{13.08}$ & $91.00 \smallStd{6.34}$ & $91.03 \smallStd{6.18}$ & $89.9 \smallStd{7.61}$ & $90.94 \smallStd{6.62}$ & $90.87 \smallStd{6.36}$ & $90.79 \smallStd{7.09}$ & $90.99 \smallStd{6.25}$ \\
+            \hline
+            \multirow{2}{*}{\em \specialcell{\changed{synth-PT:}\\\changed{real-FT}}} & \textbf{CLIPSeg} & $46.26 \smallStd{13.23}$ & $88.56 \smallStd{7.49}$ & $89.44 \smallStd{6.91}$ & $89.8 \smallStd{6.82}$ & $88.68 \smallStd{7.51}$ & $88.55 \smallStd{7.44}$ & $89.36 \smallStd{6.81}$ & $89.53 \smallStd{6.64}$\\
+            & \textbf{CRIS} & $41.09 \smallStd{18.64}$ & $\mathbf{91.26 \smallStd{6.08}}$ & $\mathbf{91.39 \smallStd{5.94}}$ & $\mathbf{91.12 \smallStd{6.27}}$ & $\mathbf{91.04 \smallStd{7.17}}$ & $\mathbf{91.23 \smallStd{6.36}}$ & $\mathbf{91.11 \smallStd{6.79}}$ & $\mathbf{91.08 \smallStd{6.6}}$
+        \end{tabular}%
+    }
+\end{table}
+
+\subsection{Real data is better than synthetic data}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{dice_camus_diff}
+    \caption{\textbf{Difference in mean dice scores between different training strategies for CLIPSeg and CRIS for different prompts.}
+    Pretraining on synthetic data before finetuning them on real data helps to improve the performance of VLSMs.}
+    \label{fig:dice_camus_diff}
+\end{figure}
+
+\cref{fig:dice_camus_diff} shows that VLSMs have better dice scores when finetuned in real data than finetuning only in synthetic data.
+When comparing the best dice scores for both strategies, the models trained on the synthetic dataset have a lower dice score \changed{($-5.19$), which is statistically highly significant by Wilcoxon signed-rank test \cite{wilcoxon1992individual} with a p-value of $8.8 \times 10^{-73}$,} on the official test split of real images.
+
+\subsection{Pretraining on synthetic data helps in finetuning on real data}
+
+In both CRIS and CLIPSeg, the \changed{pretraining} on synthetic data and then finetuning on real data (PT-FT strategy) performs better than the experiments trained with either real or artificial images as illustrated in \cref{fig:dice_camus_diff}.
+This second stage pretraining strategy has a higher dice score \changed{($+0.34$), which is statistically significant by Wilcoxon signed-rank test \cite{wilcoxon1992individual} with a p-value of $8.3 \times 10^{-6}$,} than the models that haven't seen synthetic data.
+
+\subsection{Unfreezing VLM encoders during finetuning affects models differently}
+
+To study the ability of the VLSMs to represent the alignment of image-text pairs for the echocardiography data, we perform two experiments: (\textbf{i}) freezing the VLM encoders of CRIS and CLIPSeg (\textbf{ii}) unfreezing the VLM encoders during finetuning on all datasets.
+The dice score for the unfrozen encoders is shown in the \cref{tab:combined_dice} whereas that of the frozen one is \changed{demonstrated} in \cref{tab:combined_dice_frozen}.
+\cref{fig:freeze-unfreeze-diff} shows that CRIS's performance improves when encoders are not frozen during finetuning.
+In contrast, CLIPSeg's performance degrades when the encoders are unfrozen for the CAMUS dataset (real one), which seems to have improved when synthetic data is introduced.
+
+\begin{table}[h]
+    \centering
+    \caption{\textbf{The dice score (mean $\pm$ std) on the CAMUS's official test split when the encoders of the VLMs are frozen.} \changed{For \textbf{P0} (empty prompt), the output class is ambiguous for the models. CLIPSeg dealt with this obscurity by predicting a segmentation map of a union of all the classes, while CRIS chose just noise (nothing in the case of the last strategy).}}
+    \label{tab:combined_dice_frozen}
+    \resizebox{\linewidth}{!}{%
+        \begin{tabular}{l|l|cccccccc}
+            \multirow{2}{*}{\textbf{\changed{Strategy}}} & \textbf{Prompt $\rightarrow$} & \multirow{2}{*}{\textbf{P0}} & \multirow{2}{*}{\textbf{P1}} & \multirow{2}{*}{\textbf{P2}} & \multirow{2}{*}{\textbf{P3}} & \multirow{2}{*}{\textbf{P4}} & \multirow{2}{*}{\textbf{P5}} & \multirow{2}{*}{\textbf{P6}} & \multirow{2}{*}{\textbf{P7}} \\
+            \cline{2-2}
+            & \textbf{Model $\downarrow$} \\
+            \hline
+            \multirow{2}{*}{\em \changed{synthetic}} & \textbf{CLIPSeg} & $45.71 \smallStd{13.65}$ & $84.08 \smallStd{11.08}$ & $84.01 \smallStd{10.54}$ & $84.48 \smallStd{10.99}$ & $84.02 \smallStd{11.33}$ & $84.47 \smallStd{10.68}$ & $85.47 \smallStd{9.32}$ & N/A \\
+            & \textbf{CRIS} & $35.13 \smallStd{19.48}$ & $84.19 \smallStd{13.01}$ & $84.02 \smallStd{12.23}$ & $84.62 \smallStd{11.94}$ & $84.94 \smallStd{11.49}$ & $84.23 \smallStd{12.27}$ & $80.7 \smallStd{16.99}$ & N/A \\
+            \hline
+            \multirow{2}{*}{\em \changed{real}} & \textbf{CLIPSeg} &  $\mathbf{46.52 \smallStd{13.23}}$ & $88.81 \smallStd{7.17}$ & $89.04 \smallStd{6.97}$ & $88.65 \smallStd{7.31}$ & $89.05 \smallStd{7.16}$ & $88.54 \smallStd{7.53}$ & $88.61 \smallStd{7.51}$ & $88.54 \smallStd{7.61}$ \\
+            & \textbf{CRIS} & $26.84 \smallStd{16.22}$ & $88.41 \smallStd{8.71}$ & $88.71 \smallStd{8.61}$ & $88.62 \smallStd{8.77}$ & $88.55 \smallStd{8.65}$ & $88.48 \smallStd{8.62}$ & $88.85 \smallStd{8.44}$ & $88.4 \smallStd{9.8}$ \\
+            \hline
+            \multirow{2}{*}{\em \specialcell{\changed{synth-PT:}\\\changed{real-FT}}} & \textbf{CLIPSeg} & $46.5 \smallStd{13.31}$ & $89.07 \smallStd{7.1}$ & $89.09 \smallStd{7.06}$ & $89.24 \smallStd{6.71}$ & $89.24 \smallStd{6.88}$ & $88.91 \smallStd{7.18}$ & $\textbf{89.12 \smallStd{7.04}}$ & $89.14 \smallStd{6.98}$ \\
+            & \textbf{CRIS} & $0.04 \smallStd{0.49}$ & $\mathbf{89.21 \smallStd{7.89}}$ & $\mathbf{89.54 \smallStd{7.39}}$ & $\mathbf{89.26 \smallStd{7.47}}$ & $\textbf{89.41 \smallStd{7.55}}$ & $\mathbf{89.34 \smallStd{7.78}}$ & $89.03 \smallStd{9.15}$ & $\mathbf{89.34 \smallStd{8.17}}$
+        \end{tabular}%
+    }
+\end{table}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{freeze-unfreeze-diff}
+    \caption{Difference between mean dice scores when the encoders are frozen and when the encoders are trained for different prompts.
+    CRIS's model performance improves when the encoders are trained along with the decoder.
+    In contrast, CLIPSeg's performance degrades when encoders are trained.
+    }
+    \label{fig:freeze-unfreeze-diff}
+\end{figure}
+
+\section{Discussion}
+\label{sec:discussion}
+
+Although the VLSMs do not improve over the state-of-the-art segmentation models on the CAMUS dataset (\todo{supervised baseline, according to CAMUS leaderboard\footnote{\url{https://www.creatis.insa-lyon.fr/Challenge/camus/results.html}. Updated January 2023}: $94.1$ mean dice \cite{ling2022reaching}}), it is promising that they are close.
+\changed{Pretraining} with the synthetic samples followed by finetuning in real samples improves the results compared to finetuning on real examples without synthetic pretraining. 
+One \changed{exciting} direction to explore in the future is to train together with real and synthetic data while indicating in the language prompt whether the sample is real or artificial.
+
+The VLSMs pretrained on natural image-language pairs do not seem to have captured the language-image relationships common in ultrasound images.
+Thus, when finetuning the encoders of VLSMs, the performance improved compared to freezing the encoder and finetuning only decoders.
+CRIS's performance is always better when the encoders are finetuned for every strategy, but CLIPSeg only performs better when the synthetic dataset is introduced.
+Unfrozen CLIPSeg performing better when the dataset size is increased may be because, for CRIS, Wang et al. \cite{wang2022cris} finetuned the CLIP encoders and the vision-language decoder for the segmentation task, whereas, 
+L{\"u}ddecke \changed{et al.} \cite{luddecke2022image} froze the encoders for CLIPSeg.
+Thus, CLIPSeg's encoder representation is likely not well adapted for segmentation as our finetuning of the encoder is limited to only a few thousand samples. 
+
+The synthetic dataset \cite{stojanovski2023echo} is generated by applying random augmentations to the mask of the CAMUS dataset.
+As the dataset was developed by utilizing all the labeled image-mask pairs in the training set, and the images could not be generated without the corresponding mask, this questions the ``synthetic'' portion of the method (or dataset).
+This dataset does not solve the medical image segmentation's limited paired-data availability problem by generating new examples.
+Instead, this is more akin to data augmentation, where the existing annotated set is augmented with a few thousand transformed pairs by perturbing existing masks and textures.
+An important direction in the future would be to find ways to generate aligned synthetic triplets of language, image, and mask at scale without annotated image-mask pairs.
+
+\section{Conclusion}
+
+\changed{Recent VLSMs trained in large image-language pairs of natural photographs perform close to the state-of-the-art on the CAMUS echocardiography dataset when they are finetuned on the automatically generated prompts.}
+Augmenting training sets with synthetic images generated from SDM improves VLSMs' performance.
+However, using a relatively large number of synthetic data alone is still inferior to using a relatively small number of real annotated data.
+This suggests that more work is needed in generating better synthetic images whose distribution is closer to the real data distribution for the echocardiography dataset.
+Nevertheless, the synthetic data finetuned model checkpoint seems to be a good starting point for the segmentation models to finetune on the real dataset, resulting in improved metrics and faster convergence (\changed{$4.55$ and $1.71$ times faster for CRIS and CLIPSeg, respectively.}).
+While there is a \changed{significant} potential for VLSMs for ultrasound image segmentation, there is a need to develop methods that can generate numerous consistent, realistic, but synthetic triplets of image, language, and segmentation masks, if one wants to leverage the power of VLSMs.
+
+%
+% ---- Bibliography ----
+%
+% BibTeX users should specify bibliography style 'splncs04'.
+% References will then be sorted and formatted correctly.
+%
+\bibliographystyle{splncs04}
+\bibliography{references}
+%
+
+\end{document}
