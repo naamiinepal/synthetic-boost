@@ -121,17 +121,12 @@ def main(
         # remove the base status
         mean_df = mean_df[mean_df["encoder_status"] != base_status]
 
-        metric_plot = sns.lineplot(
-            data=mean_df,
-            x="prompt_type",
-            y="diff",
-            hue="stage",
-            style="encoder_status",
-            linewidth=linewidth,
-            markers=True,
-            markersize=10,
+        metric_plot = sns.barplot(
+            data=mean_df, x="prompt_type", y="diff", hue="stage", width=0.6
         )
-        metric_plot.axes.spines["bottom"].set_position("zero")
+        # increase 0 line linewidth
+        metric_plot.axhline(0, color="black", linewidth=1)
+        # color 0 line to tab:blue
         metric_plot.set_ylabel(f"Difference in {metric.capitalize()}")
         metric_plot.set_xlabel("")
 
@@ -158,6 +153,8 @@ def main(
     if not show_yticks:
         metric_plot.set(yticks=[])
         metric_plot.set(ylabel=None)
+
+    print(metric_plot.get_ylim())
 
     model = "_".join(sorted(set(model)))
 
@@ -198,6 +195,7 @@ if __name__ == "__main__":
         "--save-fmt",
         type=str,
         default="png",
+        choices=["png", "pdf", "svg"],
         help="The format to save the plots in. Must be one of png, pdf, svg",
     )
 
