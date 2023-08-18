@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Train the models with sdm_camus dataset
-# Model configs
+#############################################
+# Finetune the VLSMs with CAMUS dataset:    #
+#############################################
 
-
+# Experiment configs
 train_models=("clip_seg" "cris")
-
 dataset="camus"
 prompts=("p0" "p1" "p2" "p3" "p4" "p5" "p6" "p7")
 
