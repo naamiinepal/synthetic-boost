@@ -113,17 +113,17 @@ def main(
         # mean_df = mean_df[mean_df["stage"] != base_stage]
         sns.set_style("whitegrid")
 
-        metric_plot = sns.lineplot(
+        metric_plot = sns.barplot(
             data=mean_df,
             x="prompt_type",
             y="diff",
             hue="stage",
-            style="model_name",
-            markers=True,
-            markersize=10,
-            linewidth=linewidth,
         )
-        metric_plot.axes.spines["bottom"].set_position("zero")
+        # increase 0 line linewidth
+        metric_plot.axhline(0, color="black", linewidth=1)
+        # color 0 line to tab:blue
+        metric_plot.axhline(0, color=sns.color_palette("tab10")[0], linewidth=1)
+
         metric_plot.set_ylabel(f"Difference in {metric.capitalize()}")
         metric_plot.set_xlabel("")
 
