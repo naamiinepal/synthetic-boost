@@ -57,3 +57,24 @@ See [LICENSE](LICENSE) for the full license text.
 
 The manuscript text (including all LaTeX files), figures, and data/models produced as part of this research are available under the [Creative Commons Attribution 4.0 License (CC-BY)](https://creativecommons.org/licenses/by/4.0/).
 See [LICENSE](paper/LICENSE) for the full license text.
+
+## Citation
+
+Please cite this work as followings:
+
+### APA Format
+
+Adhikari, R., Dhakal, M., Thapaliya, S., Poudel, K., Bhandari, P., & Khanal, B. (2023, October). Synthetic Boost: Leveraging Synthetic Data for Enhanced Vision-Language Segmentation in Echocardiography. In _International Workshop on Advances in Simplifying Medical Ultrasound_ (pp. 89-99). Cham: Springer Nature Switzerland.
+
+### BibTeX Format
+
+```bib
+@inproceedings{adhikari2023synthetic,
+  title={Synthetic Boost: Leveraging Synthetic Data for Enhanced Vision-Language Segmentation in Echocardiography},
+  author={Adhikari, Rabin and Dhakal, Manish and Thapaliya, Safal and Poudel, Kanchan and Bhandari, Prasiddha and Khanal, Bishesh},
+  booktitle={International Workshop on Advances in Simplifying Medical Ultrasound},
+  pages={89--99},
+  year={2023},
+  organization={Springer}
+}
+```
