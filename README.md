@@ -12,6 +12,8 @@ Bishesh Khanal
 This repository contains the data and source code used to produce the results presented in the
 [4th International Workshop of Advances in Simplifying Medical UltraSound (ASMUS)](https://miccai-ultrasound.github.io/#/asmus23).
 
+Paper link: [[arXiv]](https://arxiv.org/abs/2309.12829) [[Springer]](https://link.springer.com/chapter/10.1007/978-3-031-44521-7_9)
+
 ## Abstract
 
 Accurate segmentation is essential for echocardiography-based assessment of cardiovascular diseases.
